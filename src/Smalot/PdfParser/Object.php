@@ -330,7 +330,7 @@ class Object
                         }
 
                         $sub_text = $current_font->decodeText($command[self::COMMAND]);
-                        $text .= $sub_text;
+                        $text .= $sub_text . ' ';
                         break;
 
                     // set leading
@@ -345,7 +345,7 @@ class Object
                         if ($current_position_tm['y'] !== false) {
                             $delta = abs(floatval($y) - floatval($current_position_tm['y']));
                             if ($delta > 10) {
-                                $text .= "\n";
+                                $text = rtrim($text) . "\n";
                             }
                         }
                         $current_position_tm = array('x' => $x, 'y' => $y);
@@ -429,138 +429,138 @@ class Object
         return $text . ' ';
     }
 
-	/**
-	 * @param Page
-	 *
-	 * @return array
-	 * @throws \Exception
-	 */
-	public function getTextArray(Page $page = null)
-	{
-		$text                = array();
-		$sections            = $this->getSectionsText($this->content);
-		$current_font        = new Font($this->document);
+    /**
+     * @param Page
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getTextArray(Page $page = null)
+    {
+        $text                = array();
+        $sections            = $this->getSectionsText($this->content);
+        $current_font        = new Font($this->document);
 
-		foreach ($sections as $section) {
+        foreach ($sections as $section) {
 
-			$commands = $this->getCommandsText($section);
+            $commands = $this->getCommandsText($section);
 
-			foreach ($commands as $command) {
+            foreach ($commands as $command) {
 
-				switch ($command[self::OPERATOR]) {
-					// set character spacing
-					case 'Tc':
-						break;
+                switch ($command[self::OPERATOR]) {
+                    // set character spacing
+                    case 'Tc':
+                        break;
 
-					// move text current point
-					case 'Td':
-						break;
+                    // move text current point
+                    case 'Td':
+                        break;
 
-					// move text current point and set leading
-					case 'TD':
-						break;
+                    // move text current point and set leading
+                    case 'TD':
+                        break;
 
-					case 'Tf':
-						list($id,) = preg_split('/\s/s', $command[self::COMMAND]);
-						$id           = trim($id, '/');
-						$current_font = $page->getFont($id);
-						break;
+                    case 'Tf':
+                        list($id,) = preg_split('/\s/s', $command[self::COMMAND]);
+                        $id           = trim($id, '/');
+                        $current_font = $page->getFont($id);
+                        break;
 
-					case "'":
-					case 'Tj':
-						$command[self::COMMAND] = array($command);
-					case 'TJ':
-						// Skip if not previously defined, should never happened.
-						if (is_null($current_font)) {
-							// Fallback
-							// TODO : Improve
-							$text[] = $command[self::COMMAND][0][self::COMMAND];
-							continue;
-						}
+                    case "'":
+                    case 'Tj':
+                        $command[self::COMMAND] = array($command);
+                    case 'TJ':
+                        // Skip if not previously defined, should never happened.
+                        if (is_null($current_font)) {
+                            // Fallback
+                            // TODO : Improve
+                            $text[] = $command[self::COMMAND][0][self::COMMAND];
+                            continue;
+                        }
 
-						$sub_text = $current_font->decodeText($command[self::COMMAND]);
-						$text[] = $sub_text;
-						break;
+                        $sub_text = $current_font->decodeText($command[self::COMMAND]);
+                        $text[] = $sub_text;
+                        break;
 
-					// set leading
-					case 'TL':
-						break;
+                    // set leading
+                    case 'TL':
+                        break;
 
-					case 'Tm':
-						break;
+                    case 'Tm':
+                        break;
 
-					// set super/subscripting text rise
-					case 'Ts':
-						break;
+                    // set super/subscripting text rise
+                    case 'Ts':
+                        break;
 
-					// set word spacing
-					case 'Tw':
-						break;
+                    // set word spacing
+                    case 'Tw':
+                        break;
 
-					// set horizontal scaling
-					case 'Tz':
-						//$text .= "\n";
-						break;
+                    // set horizontal scaling
+                    case 'Tz':
+                        //$text .= "\n";
+                        break;
 
-					// move to start of next line
-					case 'T*':
-						//$text .= "\n";
-						break;
+                    // move to start of next line
+                    case 'T*':
+                        //$text .= "\n";
+                        break;
 
-					case 'Da':
-						break;
+                    case 'Da':
+                        break;
 
-					case 'Do':
-						if (!is_null($page)) {
-							$args = preg_split('/\s/s', $command[self::COMMAND]);
-							$id   = trim(array_pop($args), '/ ');
-							if ($xobject = $page->getXObject($id)) {
-								$text[] = $xobject->getText($page);
-							}
-						}
-						break;
+                    case 'Do':
+                        if (!is_null($page)) {
+                            $args = preg_split('/\s/s', $command[self::COMMAND]);
+                            $id   = trim(array_pop($args), '/ ');
+                            if ($xobject = $page->getXObject($id)) {
+                                $text[] = $xobject->getText($page);
+                            }
+                        }
+                        break;
 
-					case 'rg':
-					case 'RG':
-						break;
+                    case 'rg':
+                    case 'RG':
+                        break;
 
-					case 're':
-						break;
+                    case 're':
+                        break;
 
-					case 'co':
-						break;
+                    case 'co':
+                        break;
 
-					case 'cs':
-						break;
+                    case 'cs':
+                        break;
 
-					case 'gs':
-						break;
+                    case 'gs':
+                        break;
 
-					case 'en':
-						break;
+                    case 'en':
+                        break;
 
-					case 'sc':
-					case 'SC':
-						break;
+                    case 'sc':
+                    case 'SC':
+                        break;
 
-					case 'g':
-					case 'G':
-						break;
+                    case 'g':
+                    case 'G':
+                        break;
 
-					case 'V':
-						break;
+                    case 'V':
+                        break;
 
-					case 'vo':
-					case 'Vo':
-						break;
+                    case 'vo':
+                    case 'Vo':
+                        break;
 
-					default:
-				}
-			}
-		}
+                    default:
+                }
+            }
+        }
 
-		return $text;
-	}
+        return $text;
+    }
 
 
     /**
